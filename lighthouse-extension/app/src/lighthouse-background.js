@@ -99,8 +99,8 @@ function filterOutArtifacts(result) {
  * @return {!Promise}
  */
 window.runLighthouseForConnection = function(connection, url, options, aggregationNames) {
-  const runConfig = Config.generateNewConfigOfAggregations(runConfig, aggregationNames);
-  const config = new Config(runConfig);
+  const newConfig = Config.generateNewConfigOfAggregations(defaultConfig, aggregationNames);
+  const config = new Config(newConfig);
 
   // Add url and config to fresh options object.
   const runOptions = Object.assign({}, options, {url, config});
@@ -189,8 +189,8 @@ window.createReportPageAsBlob = function(results, reportContext) {
  * @return {!Array<{name: string}>}
  */
 window.getDefaultAggregations = function() {
-  return defaultConfig.aggregations.map(aggregation => ({
-    name: aggregation.name
+  return Config.getAggregationNames(defaultConfig).map(name => ({
+    name: name
   }));
 };
 

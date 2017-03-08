@@ -319,7 +319,7 @@ class Config {
     return merge(baseJSON, extendJSON);
   }
 
-  /**
+ /**
   * Filter out any unrequested aggregations from the config. If any audits are
   * no longer needed by any remaining aggregations, filter out those as well.
   * @param {!Object} oldConfig Lighthouse config object.
@@ -347,9 +347,8 @@ class Config {
     return config;
   }
 
-  /**
-  * Filter out any unrequested aggregations from the config. If any audits are
-  * no longer needed by any remaining aggregations, filter out those as well.
+ /**
+  * Return names of top-level aggregations from a config. Used by tools driving lighthouse-core
   * @param {!Object} config Lighthouse config object.
   * @return {!Array<string>}  Name values of aggregations within
   */
@@ -357,7 +356,11 @@ class Config {
     return config.aggregations.map(agg => agg.name);
   }
 
-  // Find audits required for remaining aggregations.
+  /**
+   * Find audits required for remaining aggregations.
+   * @param  {!Object} aggregations
+   * @return {!Set<string>}
+   */
   static getAuditsNeededByAggregations(aggregations) {
     const requestedItems = _flatten(aggregations.map(aggregation => aggregation.items));
     const requestedAudits = _flatten(requestedItems.map(item => Object.keys(item.audits)));
@@ -365,7 +368,9 @@ class Config {
   }
 
   /**
-   * @return {map} map from audit path (seein in config.audits) to audit.name used in config.aggregations
+   * Creates mapping from audit path (used in config.audits) to audit.name (used in config.aggregations)
+   * @param {!Object} config Lighthouse config object.
+   * @return {Map}
    */
   static getMapOfAuditPathToName(config) {
     // The `audits` property in the config is a list of paths of audits to run.
@@ -380,8 +385,13 @@ class Config {
     return auditPathToName;
   }
 
+  /**
+   * From some requested audits, return names of all required artifacts
+   * @param  {!Object} audits
+   * @return {!Set<string>}
+   */
   static getGatherersNeededByAudits(audits) {
-    // It's possible we didn't get given any audits (but existing audit results), in which case
+    // It's possible we weren't given any audits (but existing audit results), in which case
     // there is no need to do any work here.
     if (!audits) {
       return new Set();
@@ -393,6 +403,12 @@ class Config {
     }, new Set());
   }
 
+  /**
+   * Filters to only required passes and gatherers, returning a new passes object
+   * @param  {!Object} passes
+   * @param  {!Set<string>} requiredGatherers
+   * @return {!Object} fresh passes object
+   */
   static getPassesNeededByGatherers(passes, requiredGatherers) {
     const passesClone = JSON.parse(JSON.stringify(passes));
     const filteredPasses = passesClone.map(pass => {
