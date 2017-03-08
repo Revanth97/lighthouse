@@ -370,25 +370,38 @@ describe('Config', () => {
     });
   });
 
+  describe('getAggregationNames', () => {
+    it('returns the names of the aggregations', () => {
+      const runConfig = JSON.parse(JSON.stringify(defaultConfig));
+      const names = Config.getAggregationNames(runConfig);
+      assert.equal(Array.isArray(names), true);
+      assert.ok(names.length > 3, 'Did not find more than three aggregations');
+    });
+  });
+
   describe('generateConfigOfAggregations', () => {
     const aggregationNames = ['Performance'];
 
+    it('should not mutate the original config', () => {
+      const origConfig = JSON.parse(JSON.stringify(defaultConfig));
+      Config.generateNewConfigOfAggregations(defaultConfig, aggregationNames);
+      assert.deepStrictEqual(origConfig, defaultConfig, 'Original config mutated');
+    });
+
     it('should filter out other passes if passed Performance', () => {
-      const runConfig = JSON.parse(JSON.stringify(defaultConfig));
-      Config.generateConfigOfAggregations(runConfig, aggregationNames);
-      assert.equal(runConfig.aggregations.length, 1, 'other aggregations are present');
-      assert.equal(runConfig.passes.length, 2, 'incorrect # of passes');
-      assert.ok(runConfig.audits.length < 15, 'audit filtering probably failed');
+      const config = Config.generateNewConfigOfAggregations(defaultConfig, aggregationNames);
+      assert.equal(config.aggregations.length, 1, 'other aggregations are present');
+      assert.equal(config.passes.length, 2, 'incorrect # of passes');
+      assert.ok(config.audits.length < 15, 'audit filtering probably failed');
     });
 
     it('should only run audits for ones named by the aggregation', () => {
-      const runConfig = JSON.parse(JSON.stringify(defaultConfig));
-      Config.generateConfigOfAggregations(runConfig, aggregationNames);
+      const config = Config.generateNewConfigOfAggregations(defaultConfig, aggregationNames);
       const selectedAggregation = defaultConfig.aggregations
           .find(agg => aggregationNames.includes(agg.name));
       const auditCount = Object.keys(selectedAggregation.items[0].audits).length;
 
-      assert.equal(runConfig.audits.length, auditCount, '# of audits match aggregation list');
+      assert.equal(config.audits.length, auditCount, '# of audits match aggregation list');
     });
   });
 });

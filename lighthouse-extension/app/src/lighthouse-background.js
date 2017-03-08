@@ -99,11 +99,7 @@ function filterOutArtifacts(result) {
  * @return {!Promise}
  */
 window.runLighthouseForConnection = function(connection, url, options, aggregationNames) {
-  // Always start with a freshly parsed default config.
-  const runConfig = JSON.parse(JSON.stringify(defaultConfig));
-
-  // Change tags object to a plain array of tag strings
-  Config.generateConfigOfAggregations(runConfig, aggregationNames);
+  const runConfig = Config.generateNewConfigOfAggregations(runConfig, aggregationNames);
   const config = new Config(runConfig);
 
   // Add url and config to fresh options object.

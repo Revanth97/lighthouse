@@ -322,11 +322,13 @@ class Config {
   /**
   * Filter out any unrequested aggregations from the config. If any audits are
   * no longer needed by any remaining aggregations, filter out those as well.
-  * @param {!Object} config Lighthouse config object.
+  * @param {!Object} oldConfig Lighthouse config object.
   * @param {!Array<string>} aggregationNames Name values of aggregations to include.
   * @return {undefined} config is mutated, instead of returning
   */
-  static generateConfigOfAggregations(config, aggregationNames) {
+  static generateNewConfigOfAggregations(oldConfig, aggregationNames) {
+    // 0. Clone config to avoid mutating it
+    const config = JSON.parse(JSON.stringify(oldConfig));
     // 1. Filter to just the chosen aggregations
     config.aggregations = config.aggregations.filter(agg => aggregationNames.includes(agg.name));
 
@@ -341,7 +343,8 @@ class Config {
     const requiredGatherers = Config.getGatherersNeededByAudits(auditObjectsSelected);
 
     // 4. Filter to only the neccessary passes
-    config.passes = Config.selectPassesNeededByGatherers(config.passes, requiredGatherers);
+    config.passes = Config.getPassesNeededByGatherers(config.passes, requiredGatherers);
+    return config;
   }
 
   /**
@@ -390,8 +393,9 @@ class Config {
     }, new Set());
   }
 
-  static selectPassesNeededByGatherers(passes, requiredGatherers) {
-    const filteredPasses = passes.map(pass => {
+  static getPassesNeededByGatherers(passes, requiredGatherers) {
+    const passesClone = JSON.parse(JSON.stringify(passes));
+    const filteredPasses = passesClone.map(pass => {
       // remove any unncessary gatherers
       pass.gatherers = pass.gatherers.filter(gathererName => {
         gathererName = GatherRunner.getGathererClass(gathererName).name;
