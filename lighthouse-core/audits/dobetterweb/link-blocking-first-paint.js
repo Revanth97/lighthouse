@@ -37,6 +37,7 @@ class LinkBlockingFirstPaintAudit extends Audit {
       category: 'Performance',
       name: 'link-blocking-first-paint',
       description: 'Render-blocking Stylesheets',
+      informative: true,
       helpText: 'Link elements are blocking the first paint of your page. Consider ' +
           'inlining critical links and deferring non-critical ones. ' +
           '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/blocking-resources).',
